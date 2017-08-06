@@ -1,28 +1,31 @@
 from conans import ConanFile, CMake, tools
-
+import glob, os
 
 class LuacppConan(ConanFile):
     name = "lua-cpp"
     version = "5.3.4"
-    license = "<Put the package license here>"
-    url = "<Package recipe repository url here, for issues about the package>"
+    license = "MIT"
+    url = "https://github.com/jinq0123/conan-lua-cpp"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
-    default_options = "shared=False"
+    default_options = "shared=True"
     generators = "cmake"
+    exports_sources = "CMakeLists.txt"
+    
+    __name = "lua-%s" % version
 
     def source(self):
-        self.run("git clone https://github.com/memsharded/hello.git")
-        self.run("cd hello && git checkout static_shared")
-        # This small hack might be useful to guarantee proper /MT /MD linkage in MSVC
-        # if the packaged project doesn't have variables to set it properly
-        tools.replace_in_file("hello/CMakeLists.txt", "PROJECT(MyHello)", '''PROJECT(MyHello)
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()''')
-
+        zip_name = "%s.tar.gz" % self.__name    
+        url = "https://www.lua.org/ftp/%s" % self.zip_name
+        download(url, zip_name)
+        tools.check_sha1(zip_name, "79790cfd40e09ba796b01a571d4d63b52b1cd950")
+        unzip(zip_name)
+        os.unlink(zip_name)
+        __rename_c_to_cpp()
+        
     def build(self):
         cmake = CMake(self)
-        self.run('cmake hello %s' % cmake.command_line)
+        self.run('cmake . %s' % cmake.command_line)
         self.run("cmake --build . %s" % cmake.build_config)
 
     def package(self):
@@ -34,4 +37,12 @@ conan_basic_setup()''')
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["hello"]
+        self.cpp_info.libs = ["lua-cpp"]
+
+    
+    def __rename_c_to_cpp(self):
+        # Rename *.c files to *.cpp
+        c = glob.glob(r'src/*.c')
+        for f in c:
+            print(f)
+            # os.rename(f, f + "pp")
