@@ -32,7 +32,11 @@ class LuacppConan(ConanFile):
         cmake.build()        
 
     def package(self):
-        self.copy("*.h", dst="include", src="hello")
+        inc_h = "lua.h", "luaconf.h", "lualib.h", "lauxlib.h", "lua.hpp"
+        src_dir = "%s/src" % self.__name
+        for h in inc_h:
+            self.copy(h, dst="include", src=src_dir)
+            
         self.copy("*hello.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)

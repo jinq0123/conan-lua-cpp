@@ -1,6 +1,8 @@
-#include <iostream>
-#include "hello.h"
+#include <cassert>
+
+#include "lua.h"
 
 int main() {
-    hello();
+	lua_State* L = lua_open();
+	return 0;
 }
