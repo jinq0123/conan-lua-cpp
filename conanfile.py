@@ -1,32 +1,35 @@
 from conans import ConanFile, CMake, tools
-import glob, os
+import glob, os, shutil
 
 class LuacppConan(ConanFile):
     name = "lua-cpp"
     version = "5.3.4"
     license = "MIT"
     url = "https://github.com/jinq0123/conan-lua-cpp"
+    description = "Lua %s build as C++" % version
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     default_options = "shared=True"
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
-    
+
     __name = "lua-%s" % version
 
     def source(self):
-        zip_name = "%s.tar.gz" % self.__name    
-        url = "https://www.lua.org/ftp/%s" % self.zip_name
-        download(url, zip_name)
+        zip_name = "%s.tar.gz" % self.__name
+        url = "https://www.lua.org/ftp/%s" % zip_name
+        tools.download(url, zip_name)
         tools.check_sha1(zip_name, "79790cfd40e09ba796b01a571d4d63b52b1cd950")
-        unzip(zip_name)
+        tools.unzip(zip_name)
         os.unlink(zip_name)
-        __rename_c_to_cpp()
         
+        shutil.move("CMakeLists.txt", "%s/CMakeLists.txt" % self.__name)
+        self.__rename_c_to_cpp()
+
     def build(self):
         cmake = CMake(self)
-        self.run('cmake . %s' % cmake.command_line)
-        self.run("cmake --build . %s" % cmake.build_config)
+        cmake.configure(source_dir=self.__name)
+        cmake.build()        
 
     def package(self):
         self.copy("*.h", dst="include", src="hello")
@@ -39,10 +42,9 @@ class LuacppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["lua-cpp"]
 
-    
+
     def __rename_c_to_cpp(self):
         # Rename *.c files to *.cpp
-        c = glob.glob(r'src/*.c')
-        for f in c:
-            print(f)
-            # os.rename(f, f + "pp")
+        cfiles = glob.glob(r'%s/src/*.c' % self.__name)
+        for f in cfiles:
+            os.rename(f, f + "pp")
