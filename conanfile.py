@@ -32,10 +32,15 @@ class LuacppConan(ConanFile):
         cmake.build()        
 
     def package(self):
-        inc_h = "lua.h", "luaconf.h", "lualib.h", "lauxlib.h", "lua.hpp"
+        inc_h = "lua.h", "luaconf.h", "lualib.h", "lauxlib.h"  # no "lua.hpp"
         src_dir = "%s/src" % self.__name
         for h in inc_h:
             self.copy(h, dst="include", src=src_dir)
+
+        self.copy("*lua-cpp", dst="bin", keep_path=False)
+        self.copy("*luac-cpp", dst="bin", keep_path=False)
+        self.copy("*lua-cpp.exe", dst="bin", keep_path=False)
+        self.copy("*luac-cpp.exe", dst="bin", keep_path=False)
             
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
