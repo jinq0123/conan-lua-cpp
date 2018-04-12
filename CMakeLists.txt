@@ -6,6 +6,9 @@ list(REMOVE_ITEM LIB_SRC "src/lua.cpp" "src/luac.cpp")
 add_library(lua-cpp SHARED ${LIB_SRC})
 if(WIN32)
     set_target_properties(lua-cpp PROPERTIES COMPILE_DEFINITIONS LUA_BUILD_AS_DLL)
+else()
+    # To fix: dynamic libraries not enabled
+    add_definitions(-DLUA_USE_LINUX)
 endif()
 
 add_executable(lua-cpp-console "src/lua.cpp")
