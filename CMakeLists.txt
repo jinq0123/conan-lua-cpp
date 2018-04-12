@@ -9,6 +9,7 @@ if(WIN32)
 else()
     # To fix: dynamic libraries not enabled
     add_definitions(-DLUA_USE_LINUX)
+    target_link_libraries(lua-cpp dl readline)
 endif()
 
 add_executable(lua-cpp-console "src/lua.cpp")
